@@ -12,6 +12,8 @@ def which(pgm):
         if os.path.exists(p) and os.access(p,os.X_OK):
             return p
 
+sysr = random.SystemRandom()
+sysr.seed()
 tree = ET.parse('yp.xml')
 element_root = tree.getroot()
 
@@ -21,10 +23,12 @@ for child in element_root:
     for entryc in child:
         if (entryc.tag == 'listen_url'):
             url = entryc.text
-        if (entryc.tag == 'genre' and ('class' in entryc.text.lower())):
+        if (entryc.tag == 'genre' and ('classical' in entryc.text.lower())):
             urls.append(url)
+            continue
 
-playurl = random.choice(urls)
+r =  sysr.randint(0, len(urls))
+url = urls[r]
 
 ffplay = which('ffplay')
 mplayer = which('mplayer')
