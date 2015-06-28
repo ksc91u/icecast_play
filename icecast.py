@@ -27,7 +27,7 @@ for child in element_root:
             urls.append(url)
             continue
 
-r =  sysr.randint(0, len(urls))
+r =  sysr.randint(0, len(urls)-1)
 url = urls[r]
 
 ffplay = which('ffplay')
