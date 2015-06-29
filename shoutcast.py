@@ -49,18 +49,23 @@ def getPlayUrl(id):
 sysr = random.SystemRandom()
 sysr.seed()
 
-def getFromTop():
+def getFromTop(genre):
     json_data=open("shoutcast.json",'rb').read().decode('utf-8')
     data = json.loads(json_data)
 
     ids = []
 
     for d in data:
-        if ('classical' in d['Genre'].lower()):
+        if (genre in d['Genre'].lower()):
             ids.append(d['ID'])
     return ids
 
-ids = search('classical')
+if (len(sys.argv) < 2):
+    genre = 'classical'
+else:
+    genre = sys.argv[1]
+
+ids = search(genre)
 r =  sysr.randint(0, len(ids)-1)
 url = getPlayUrl(ids[r])
 print(url)

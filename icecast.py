@@ -53,9 +53,16 @@ if not checkdb():
     print("Initialize db")
     initdb()
 
+
+if (len(sys.argv) < 2):
+    genre = 'classical'
+else:
+    genre = sys.argv[1]
+
 conn = sqlite3.connect('channels.db')
 c = conn.cursor()
-c.execute('''select listen_url from channels order by RANDOM() limit 1''')
+c.execute('''select * from ( select listen_url, genre from channels where genre = ?) order by RANDOM() limit 1''',[(genre)])
+#c.execute('''select listen_url from channels order by RANDOM() limit 1''')
 
 url = c.fetchone()[0]
 
