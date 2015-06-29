@@ -38,7 +38,11 @@ def initdb():
 def checkdb():
     conn = sqlite3.connect('channels.db')
     c = conn.cursor()
-    c.execute('''select count(1) from channels''')
+    try:
+        c.execute('''select count(1) from channels''')
+    except sqlite3.OperationalError:
+        createdb()
+        return False
     if (c.fetchone()[0] > 0):
         return True
     else:
