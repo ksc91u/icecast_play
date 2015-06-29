@@ -1,9 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 #http://dir.xiph.org/yp.xml
 import xml.etree.ElementTree as ET
 import random
 import os, os.path, sys
+import sqlite3
 
+
+def createdb():
+    conn = sqlite3.connect('channels.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE channels
+                 (server_name text, listen_url text, server_type text, bitrate int, genre text)''')
+    conn.commit()
+    conn.close()
 
 def which(pgm):
     path=os.getenv('PATH')
@@ -12,23 +22,39 @@ def which(pgm):
         if os.path.exists(p) and os.access(p,os.X_OK):
             return p
 
-sysr = random.SystemRandom()
-sysr.seed()
-tree = ET.parse('yp.xml')
-element_root = tree.getroot()
+def initdb():
+    conn = sqlite3.connect('channels.db')
+    c = conn.cursor()
+    tree = ET.parse('yp.xml')
+    element_root = tree.getroot()
+    for child in element_root:
+        channel={}
+        for entryc in child:
+            channel[entryc.tag] = entryc.text
+        c.execute('''INSERT INTO channels (server_name, listen_url, server_type, bitrate, genre) values (?,?,?,?,?)''', (channel['server_name'], channel['listen_url'], channel['server_type'], channel['bitrate'], channel['genre']))
+        conn.commit()
+    conn.close()
 
-urls = []
+def checkdb():
+    conn = sqlite3.connect('channels.db')
+    c = conn.cursor()
+    c.execute('''select count(1) from channels''')
+    if (c.fetchone()[0] > 0):
+        return True
+    else:
+        return False
+    conn.close()
 
-for child in element_root:
-    for entryc in child:
-        if (entryc.tag == 'listen_url'):
-            url = entryc.text
-        if (entryc.tag == 'genre' and ('classical' in entryc.text.lower())):
-            urls.append(url)
-            continue
+if not checkdb():
+    print("Initialize db")
+    initdb()
 
-r =  sysr.randint(0, len(urls)-1)
-url = urls[r]
+conn = sqlite3.connect('channels.db')
+c = conn.cursor()
+c.execute('''select listen_url from channels order by RANDOM() limit 1''')
+
+url = c.fetchone()[0]
+
 
 ffplay = which('ffplay')
 mplayer = which('mplayer')
