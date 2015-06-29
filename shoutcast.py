@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 import random
 import os, os.path, sys
 import json
@@ -30,7 +31,7 @@ def getPlayUrl(id):
 sysr = random.SystemRandom()
 sysr.seed()
 
-json_data=open("shoutcast.json").read()
+json_data=open("shoutcast.json",'rb').read().decode('utf-8')
 data = json.loads(json_data)
 
 ids = []
