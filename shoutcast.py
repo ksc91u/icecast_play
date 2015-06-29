@@ -14,6 +14,24 @@ def which(pgm):
         if os.path.exists(p) and os.access(p,os.X_OK):
             return p
 
+def search(key):
+    data = {
+        'query':key
+    }
+    data = urllib.parse.urlencode(data)
+    headers = {
+        'X-Requested-With':'XMLHttpRequest'
+    }
+    req = urllib2.Request('http://www.shoutcast.com/Search/UpdateSearch', data.encode('ascii'), headers)
+    response = urllib2.urlopen(req)
+    the_page = response.read()
+    json_data = json.loads(the_page.decode('utf-8'))
+    ids = []
+    for d in json_data:
+        ids.append(d['ID'])
+    print("Found " + str(len(ids)) + " channels")
+    return ids
+
 def getPlayUrl(id):
     data = {
     	'station':str(id)
@@ -31,15 +49,18 @@ def getPlayUrl(id):
 sysr = random.SystemRandom()
 sysr.seed()
 
-json_data=open("shoutcast.json",'rb').read().decode('utf-8')
-data = json.loads(json_data)
+def getFromTop():
+    json_data=open("shoutcast.json",'rb').read().decode('utf-8')
+    data = json.loads(json_data)
 
-ids = []
+    ids = []
 
-for d in data:
-    if ('classical' in d['Genre'].lower()):
-    	ids.append(d['ID'])
+    for d in data:
+        if ('classical' in d['Genre'].lower()):
+            ids.append(d['ID'])
+    return ids
 
+ids = search('classical')
 r =  sysr.randint(0, len(ids)-1)
 url = getPlayUrl(ids[r])
 print(url)
