@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 #http://dir.xiph.org/yp.xml
+from inspect import getsourcefile
+from os.path import abspath
 import xml.etree.ElementTree as ET
 import random
 import os, os.path, sys
@@ -8,7 +10,7 @@ import sqlite3
 
 
 def createdb():
-    conn = sqlite3.connect('channels.db')
+    conn = sqlite3.connect(module_path() + 'channels.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE channels
                  (server_name text, listen_url text, server_type text, bitrate int, genre text)''')
@@ -23,9 +25,9 @@ def which(pgm):
             return p
 
 def initdb():
-    conn = sqlite3.connect('channels.db')
+    conn = sqlite3.connect(module_path() + 'channels.db')
     c = conn.cursor()
-    tree = ET.parse('yp.xml')
+    tree = ET.parse(module_path() + 'yp.xml')
     element_root = tree.getroot()
     for child in element_root:
         channel={}
@@ -36,7 +38,7 @@ def initdb():
     conn.close()
 
 def checkdb():
-    conn = sqlite3.connect('channels.db')
+    conn = sqlite3.connect(module_path() + 'channels.db')
     c = conn.cursor()
     try:
         c.execute('''select count(1) from channels''')
@@ -49,6 +51,9 @@ def checkdb():
         return False
     conn.close()
 
+def module_path():
+    return os.path.dirname(abspath(getsourcefile(lambda:0))) + "/"
+
 if not checkdb():
     print("Initialize db")
     initdb()
@@ -59,7 +64,7 @@ if (len(sys.argv) < 2):
 else:
     genre = sys.argv[1]
 
-conn = sqlite3.connect('channels.db')
+conn = sqlite3.connect(module_path() + 'channels.db')
 c = conn.cursor()
 c.execute('''select * from ( select listen_url, genre from channels where genre = ?) order by RANDOM() limit 1''',[(genre)])
 #c.execute('''select listen_url from channels order by RANDOM() limit 1''')
