@@ -9,8 +9,12 @@ from pprint import pprint
 import urllib.request as urllib2
 import urllib.parse
 from utils.utils import *
+from pprint import pprint
 
 def search(key):
+    conn = sqlite3.connect(module_path() + 'channels.db')
+    c = conn.cursor()
+
     data = {
         'query':key,
 	'limit':str(500)
@@ -22,11 +26,29 @@ def search(key):
     req = urllib2.Request('http://www.shoutcast.com/Search/UpdateSearch', data.encode('ascii'), headers)
     response = urllib2.urlopen(req)
     the_page = response.read()
+
     json_data = json.loads(the_page.decode('utf-8'))
     ids = []
     for d in json_data:
+        try:
+            c.execute('''INSERT INTO channels (server_name, listen_url, server_type, bitrate, genre, source) values (?,?,?,?,?,?)''', (d['Name'], d['ID'], d['Format'], d['Bitrate'], d['Genre'].lower(), 'scst'))
+        except sqlite3.IntegrityError:
+            pass
         ids.append(d['ID'])
+    conn.commit()
+    conn.close()
     print("Found " + str(len(ids)) + " channels")
+    return ids
+
+def searchFromDb(key):
+    conn = sqlite3.connect(module_path() + 'channels.db')
+    c = conn.cursor()
+    c.execute('''select * from ( select listen_url, genre from channels where genre like ? and source="scst") order by RANDOM() limit 1''',[(key.lower()+"%")])
+    ids = []
+    one = c.fetchone()
+    if (one is None):
+        return ids
+    ids.append(one[0])
     return ids
 
 def getPlayUrl(id):
@@ -45,6 +67,11 @@ def getPlayUrl(id):
 
 sysr = random.SystemRandom()
 sysr.seed()
+try:
+    searchFromDb('anything g')
+except sqlite3.OperationalError:
+    createdb()
+
 
 def getFromTop(genre):
     json_data=open(module_path() + "shoutcast.json",'rb').read().decode('utf-8')
@@ -62,9 +89,13 @@ if (len(sys.argv) < 2):
 else:
     genre = sys.argv[1]
 
-ids = search(genre)
+ids = searchFromDb(genre)
+print("Db result "+ str(len(ids)))
 if (len(ids) <= 0):
-    ids = getFromTop(genre)
+    ids = search(genre)
+    print("Search result "+ str(len(ids)))
+    if (len(ids) <= 0):
+        ids = getFromTop(genre)
 r =  sysr.randint(0, len(ids)-1)
 url = getPlayUrl(ids[r])
 print(url)

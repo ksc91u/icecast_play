@@ -6,6 +6,15 @@ import random
 import os, os.path, sys
 import sqlite3
 
+
+def createdb():
+    conn = sqlite3.connect(module_path() + 'channels.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE channels
+                 (server_name text, listen_url text UNIQUE, server_type text, bitrate int, genre text, source text)''')
+    conn.commit()
+    conn.close()
+
 def which(pgm):
     path=os.getenv('PATH')
     for p in path.split(os.path.pathsep):
