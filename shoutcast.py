@@ -8,13 +8,7 @@ import json
 from pprint import pprint
 import urllib.request as urllib2
 import urllib.parse
-
-def which(pgm):
-    path=os.getenv('PATH')
-    for p in path.split(os.path.pathsep):
-        p=os.path.join(p,pgm)
-        if os.path.exists(p) and os.access(p,os.X_OK):
-            return p
+from utils.utils import *
 
 def search(key):
     data = {
@@ -34,9 +28,6 @@ def search(key):
         ids.append(d['ID'])
     print("Found " + str(len(ids)) + " channels")
     return ids
-
-def module_path():
-    return os.path.dirname(abspath(getsourcefile(lambda:0))) + "/"
 
 def getPlayUrl(id):
     data = {
@@ -78,10 +69,5 @@ r =  sysr.randint(0, len(ids)-1)
 url = getPlayUrl(ids[r])
 print(url)
 
-ffplay = which('ffplay')
-ffplay=None
-mplayer = which('mplayer')
-if (ffplay is not None):
-    os.execl(ffplay,'ffplay','-nodisp','-bufsize','256k',url)
-elif (mplayer is not None):
-    os.execl(mplayer,'mplayer','-prefer-ipv4','-cache','256','-vo','null',url)
+playUrl(url)
+
