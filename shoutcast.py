@@ -10,6 +10,17 @@ import urllib.request as urllib2
 import urllib.parse
 from utils.utils import *
 from pprint import pprint
+import concurrent.futures
+
+def mapped_search(keys):
+    ids = []
+    for k in keys.split(','):
+        print(k)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(search, k)
+            print("mapped_search i " + str(len(future.result())))
+            ids.extend(future.result())
+    return ids
 
 def search(key):
     conn = sqlite3.connect(module_path() + 'channels.db')
@@ -17,7 +28,7 @@ def search(key):
 
     data = {
         'query':key,
-	'limit':str(500)
+        'limit':str(500)
     }
     data = urllib.parse.urlencode(data)
     headers = {
@@ -34,7 +45,11 @@ def search(key):
             c.execute('''INSERT INTO channels (server_name, listen_url, server_type, bitrate, genre, source) values (?,?,?,?,?,?)''', (d['Name'], d['ID'], d['Format'], d['Bitrate'], d['Genre'].lower(), 'scst'))
         except sqlite3.IntegrityError:
             pass
-        ids.append(d['ID'])
+        if(d['Listeners'] == 0):
+            pass
+        else:
+            ids.append(d['ID'])
+
     conn.commit()
     conn.close()
     print("Found " + str(len(ids)) + " channels")
@@ -89,8 +104,12 @@ if (len(sys.argv) < 2):
 else:
     genre = sys.argv[1]
 
+ids_search = mapped_search(sys.argv[1])
+print("mapped_search result "+ str(len(ids_search)))
+
 ids = searchFromDb(genre)
 print("Db result "+ str(len(ids)))
+ids.extend(ids_search)
 if (len(ids) <= 0):
     ids = search(genre)
     print("Search result "+ str(len(ids)))
