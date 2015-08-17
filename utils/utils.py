@@ -31,3 +31,14 @@ def playUrl(url):
         os.execl(ffplay,'ffplay','-nodisp','-bufsize','256k',url)
     elif (mplayer is not None):
         os.execl(mplayer,'mplayer','-prefer-ipv4','-cache','256','-vo','null',url)
+
+def recordUrl(url):
+    ffmpeg = which('ffmpeg')
+    avconv = which('avconv')
+    filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".aac"
+    if (ffmpeg is not None):
+        os.execl(ffmpeg,'ffmpeg','-i',url,'-vcodec','copy','-acodec','copy',filename)
+    elif (avconv is not None):
+        os.execl(avconv,'avconv','-i',url,'-vcodec','copy','-acodec','copy',filename)
+    else:
+        print("No ffmpeg or avconv found")
