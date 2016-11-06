@@ -19,13 +19,20 @@ def search_async(x):
     return Observable.just(search(x))
 
 def output(r):
-    print(r)
+    print("result " + str(r) + str(len(r)))
+
 
 async def future_search(keys):
-    with concurrent.futures.ProcessPoolExecutor(5) as executor:
-        rx.Observable.from_(keys.split(',')).flat_map(
-            lambda s: executor.submit(search, s)
-    ).subscribe(output)
+#    with concurrent.futures.ProcessPoolExecutor(5) as executor:
+#        xy = rx.Observable.from_(keys.split(',')).flat_map(
+#                lambda s: executor.submit(search, s)
+#                )
+#        xs = xs.merge(xy).subscribe(output)
+    rx.Observable.from_(keys.split(',')).flat_map(
+            lambda s: search(s)
+            ).to_list().subscribe(output)
+
+
 
 def mapped_search(keys):
     ids = []
@@ -38,6 +45,7 @@ def mapped_search(keys):
     return ids
 
 def search(key):
+    print("start search " + key)
     conn = sqlite3.connect(module_path() + 'channels.db')
     c = conn.cursor()
 
