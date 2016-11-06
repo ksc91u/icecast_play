@@ -11,6 +11,21 @@ import urllib.parse
 from utils.utils import *
 from pprint import pprint
 import concurrent.futures
+import asyncio
+from rx import Observable
+import rx
+
+def search_async(x):
+    return Observable.just(search(x))
+
+def output(r):
+    print(r)
+
+async def future_search(keys):
+    with concurrent.futures.ProcessPoolExecutor(5) as executor:
+        rx.Observable.from_(keys.split(',')).flat_map(
+            lambda s: executor.submit(search, s)
+    ).subscribe(output)
 
 def mapped_search(keys):
     ids = []
@@ -98,6 +113,11 @@ def getFromTop(genre):
         if (genre in d['Genre'].lower()):
             ids.append(d['ID'])
     return ids
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(future_search("kpop,jpop"))
+loop.close()
 
 if (len(sys.argv) < 2):
     genre = 'classical'
