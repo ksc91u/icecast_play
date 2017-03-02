@@ -19,15 +19,20 @@ def search_async(x):
     return Observable.just(search(x))
 
 def output(r):
-    print("result " + str(r) + str(len(r)))
+    rid =  sysr.randint(0, len(r)-1)
+    url = getPlayUrl(r[rid])
+    print(url)
+
+    playUrl(url)
+
 
 
 async def future_search(keys):
 #    with concurrent.futures.ProcessPoolExecutor(5) as executor:
-#        xy = rx.Observable.from_(keys.split(',')).flat_map(
+#        rx.Observable.from_(keys.split(',')).flat_map(
 #                lambda s: executor.submit(search, s)
-#                )
-#        xs = xs.merge(xy).subscribe(output)
+#                ).from_future
+
     rx.Observable.from_(keys.split(',')).flat_map(
             lambda s: search(s)
             ).to_list().subscribe(output)
@@ -123,14 +128,19 @@ def getFromTop(genre):
     return ids
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(future_search("kpop,jpop"))
-loop.close()
+#loop = asyncio.get_event_loop()
+#loop.run_until_complete(future_search("kpop,jpop"))
+#loop.close()
 
 if (len(sys.argv) < 2):
     genre = 'classical'
 else:
     genre = sys.argv[1]
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(future_search(genre))
+loop.close()
+exit(0)
 
 ids_search = mapped_search(sys.argv[1])
 print("mapped_search result "+ str(len(ids_search)))
