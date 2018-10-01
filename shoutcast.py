@@ -34,7 +34,7 @@ def search(key):
     headers = {
         'X-Requested-With':'XMLHttpRequest'
     }
-    req = urllib2.Request('http://www.shoutcast.com/Search/UpdateSearch', data.encode('ascii'), headers)
+    req = urllib2.Request('https://directory.shoutcast.com/Search/UpdateSearch', data.encode('ascii'), headers)
     response = urllib2.urlopen(req)
     the_page = response.read()
 
@@ -74,7 +74,7 @@ def getPlayUrl(id):
     headers = {
     	'X-Requested-With':'XMLHttpRequest'
     }
-    req = urllib2.Request('http://www.shoutcast.com/Player/GetStreamUrl', data.encode('ascii'), headers) 
+    req = urllib2.Request('http://directory.shoutcast.com/Player/GetStreamUrl', data.encode('ascii'), headers) 
     response = urllib2.urlopen(req)
     the_page = response.read()
     return the_page.decode('ascii').strip('"')
