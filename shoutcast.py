@@ -115,9 +115,17 @@ if (len(ids) <= 0):
     print("Search result "+ str(len(ids)))
     if (len(ids) <= 0):
         ids = getFromTop(genre)
-r =  sysr.randint(0, len(ids)-1)
-url = getPlayUrl(ids[r])
-print(url)
 
-playUrl(url)
+count = 0
+while 1 < 2 :
+    r =  sysr.randint(0, len(ids)-1)
+    url = getPlayUrl(ids[r])
+    if 'radionomy' not in url:
+        print(url)
+        playUrl(url)
+    else:
+        print("skip " + url)
+    count = count + 1
+    if count > 20 :
+        break
 
